@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/unified-chord-system.css" />
+    <title>Unified Chord Selector Test</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎼 Unified Chord System Test</h1>
+
+      <div id="chord-selector-container"></div>
+
+      <div class="test-output">
+        <h3>Selected Chord Data</h3>
+        <div id="chord-output" class="chord-data">
+          Select a chord above to see the unified data structure...
+        </div>
+      </div>
+
+      <div class="test-output">
+        <h3>System Information</h3>
+        <div class="chord-data">
+          <span class="highlight">Chord Qualities Available:</span>
+          <span id="quality-count">0</span>
+          <span class="highlight">Naming Convention:</span> Professional Jazz
+          Standards <span class="highlight">Symbol Format:</span> Spaced (e.g.,
+          "Cm 7 ♭5" not "Cm7b5") <span class="highlight">Consistency:</span> ✅
+          Unified between Selector & Analyzer
+        </div>
+      </div>
+    </div>
+
+    <!-- Include the unified chord system -->
+    <script src="js/unified-chord-system.js"></script>
+
+    <script>
+      // Initialize the chord selector
+      const chordSelector = new ChordSelector("#chord-selector-container");
+
+      // Set up callback to display chord data
+      chordSelector.setChordSelectedCallback((chord) => {
+        const output = document.getElementById("chord-output");
+
+        if (chord) {
+          // Format the chord data for display
+          output.textContent = `Selected Chord: ${chord.symbol}
+
+Root: ${chord.root}
+Quality: ${chord.quality}
+Intervals: [${chord.intervals.join(", ")}]
+MIDI Notes: [${chord.midiNotes.join(", ")}]
+Note Names: [${chord.noteNames.join(", ")}]
+
+Metadata:
+  Confidence: ${String(chord.metadata.confidence)}
+  Source: ${chord.metadata.source}
+  Timestamp: ${chord.metadata.timestamp}
+
+Formatted Notes: ${ChordUtils.formatNotesList(chord.noteNames)}`;
+        } else {
+          output.textContent = "No chord selected...";
+        }
+      });
+
+      // Display system info
+      document.getElementById("quality-count").textContent = String(Object.keys(
+        ChordData.chordQualities,
+      ).length);
+
+      // Test chord analyzer consistency (optional)
+      console.log("🎼 Unified Chord System Loaded");
+      console.log(
+        "Available chord qualities:",
+        Object.keys(ChordData.chordQualities),
+      );
+      console.log(
+        "Test chord analysis:",
+        new ChordAnalyzer().analyzeNotes([60, 64, 67]),
+      ); // C major
+    </script>
+  </body>
+</html>

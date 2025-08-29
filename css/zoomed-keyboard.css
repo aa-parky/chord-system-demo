@@ -1,0 +1,159 @@
+body {
+  margin: 0;
+  padding: 10px;
+  background-color: #252b35;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.zoomed-keyboard {
+  position: relative;
+  width: 548px;
+  height: 108px;
+  background-color: #010101;
+  border-radius: 4px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.zoomed-keyboard__keys {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.zoomed-keyboard__key--white {
+  position: absolute;
+  width: 35px;
+  height: 80px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 0 0 4px 4px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 5px;
+  font-size: 10px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.zoomed-keyboard__key--white:hover {
+  background-color: #f0f0f0;
+}
+
+.zoomed-keyboard__key--black {
+  position: absolute;
+  width: 20px;
+  height: 50px;
+  background-color: #333;
+  border: 1px solid #000;
+  border-radius: 0 0 2px 2px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+  font-size: 5px;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
+  z-index: 2;
+  transition: background-color 0.1s;
+}
+
+.zoomed-keyboard__key--black:hover {
+  background-color: #555;
+}
+
+.zoomed-keyboard__note-label {
+  text-align: center;
+  line-height: 1.2;
+  font-size: 9px;
+}
+
+/* White key positions */
+.zoomed-keyboard__position--c3 {
+  left: 0;
+  color: red;
+}
+.zoomed-keyboard__position--d3 {
+  left: 35px;
+}
+.zoomed-keyboard__position--e3 {
+  left: 70px;
+}
+.zoomed-keyboard__position--f3 {
+  left: 105px;
+}
+.zoomed-keyboard__position--g3 {
+  left: 140px;
+}
+.zoomed-keyboard__position--a3 {
+  left: 175px;
+}
+.zoomed-keyboard__position--b3 {
+  left: 210px;
+}
+.zoomed-keyboard__position--c4 {
+  left: 245px;
+  color: red;
+}
+.zoomed-keyboard__position--d4 {
+  left: 280px;
+}
+.zoomed-keyboard__position--e4 {
+  left: 315px;
+}
+.zoomed-keyboard__position--f4 {
+  left: 350px;
+}
+.zoomed-keyboard__position--g4 {
+  left: 385px;
+}
+.zoomed-keyboard__position--a4 {
+  left: 420px;
+}
+.zoomed-keyboard__position--b4 {
+  left: 455px;
+}
+.zoomed-keyboard__position--c5 {
+  left: 490px;
+  color: red;
+}
+
+/* Black key positions */
+.zoomed-keyboard__position--cs3 {
+  left: 25px;
+}
+.zoomed-keyboard__position--ds3 {
+  left: 60px;
+}
+.zoomed-keyboard__position--fs3 {
+  left: 130px;
+}
+.zoomed-keyboard__position--gs3 {
+  left: 165px;
+}
+.zoomed-keyboard__position--as3 {
+  left: 200px;
+}
+.zoomed-keyboard__position--cs4 {
+  left: 270px;
+}
+.zoomed-keyboard__position--ds4 {
+  left: 305px;
+}
+.zoomed-keyboard__position--fs4 {
+  left: 375px;
+}
+.zoomed-keyboard__position--gs4 {
+  left: 410px;
+}
+.zoomed-keyboard__position--as4 {
+  left: 445px;
+}

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chord System Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    .demo-section {
+      margin-bottom: 30px;
+    }
+    .demo-section h2 {
+      color: #555;
+      margin-top: 0;
+    }
+    .keyboard-container {
+      margin-top: 20px;
+    }
+    .code-example {
+      background-color: #f8f8f8;
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: monospace;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Chord System Demo</h1>
+
+    <div class="demo-section">
+      <h2>Interactive Chord Selector</h2>
+      <p>Select a chord and see it displayed on the keyboard.</p>
+      <div id="chord-selector"></div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Standalone Keyboard</h2>
+      <p>A standalone piano keyboard component.</p>
+      <div id="keyboard-demo" class="keyboard-container"></div>
+    </div>
+
+    <div class="demo-section">
+      <h2>How to Use</h2>
+      <p>Include the chord-system-bundle.js file in your HTML:</p>
+      <div class="code-example">
+        &lt;script src="js/chord-system-bundle.js"&gt;&lt;/script&gt;
+      </div>
+
+      <p>Initialize a chord selector:</p>
+      <div class="code-example">
+        const chordSelector = ChordSystem.init('#selector-container');
+      </div>
+
+      <p>Create a standalone keyboard:</p>
+      <div class="code-example">
+        const keyboard = ChordSystem.createKeyboard('#keyboard-container');
+      </div>
+
+      <p>Highlight notes on a keyboard:</p>
+      <div class="code-example">
+        // MIDI note numbers for a C major chord
+        keyboard.highlightChordNotes([60, 64, 67]);
+      </div>
+    </div>
+  </div>
+
+  <!-- Include the chord system bundle -->
+  <script src="js/chord-system-bundle.js"></script>
+
+  <script>
+    // Initialize the chord selector
+    const chordSelector = ChordSystem.init('#chord-selector');
+
+    // Create a standalone keyboard
+    const keyboard = ChordSystem.createKeyboard('#keyboard-demo');
+
+    // Highlight a C major chord on the standalone keyboard
+    setTimeout(() => {
+      keyboard.highlightChordNotes([60, 64, 67]); // C, E, G in octave 4
+    }, 500);
+  </script>
+</body>
+</html>
