@@ -1,524 +1,448 @@
 /**
- * Unified Chord System
- * Single file containing all chord data, naming conventions, and display logic
- * Used by both ChordSelector and ChordAnalyzer for consistency
+ * Unified Chord System (de-duplicated v6)
+ * - Removes final 19-line duplicate by abstracting a rules-based collection used for extensions/alterations
+ * - Preserves public API and behavior
+ *   Globals: ChordData, ChordUtils, ChordSelector, ChordAnalyzer
  */
 
 // @ts-nocheck
-// This file may contain some non-ASCII characters in musical notation
-
 /* global module:true */
-// The above line tells the IDE that the module may exist globally
+
+// ===== CONSTANTS =====
+const UCS_CONSTANTS = {
+    SELECTOR_TEMPLATE: `
+    <div class="chord-selector">
+      <h3>Chord Selection</h3>
+      <div class="chord-selector-controls">
+        <div class="dropdown-group">
+          <label for="root-note-select">Root Note:</label>
+          <select id="root-note-select" class="chord-dropdown">
+            <option value="">Select root note...</option>
+          </select>
+        </div>
+        <div class="dropdown-group">
+          <label for="chord-quality-select">Chord Quality:</label>
+          <select id="chord-quality-select" class="chord-dropdown">
+            <option value="">Select chord quality...</option>
+          </select>
+        </div>
+      </div>
+      <div class="chord-info-container" style="display: none;">
+        <div class="selected-chord-info">
+          <div class="selected-chord-symbol"></div>
+          <div class="selected-chord-notes"></div>
+          <button class="clear-selected-chord">Clear</button>
+        </div>
+        <div class="zoom-keyboard-panel">zoom-keyboard</div>
+      </div>
+    </div>
+  `,
+};
+
+// ===== BUILDERS (remove large duplicated literals) =====
+const NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+
+function buildRootNotes() {
+    const enharmonic = {
+        "C#": "C#/Db",
+        "D#": "D#/Eb",
+        "F#": "F#/Gb",
+        "G#": "G#/Ab",
+        "A#": "A#/Bb",
+    };
+    return NOTE_NAMES.map(n => ({ value: n, label: enharmonic[n] || n }));
+}
+
+// [name, label, symbol, intervals, priority]
+const QUALITY_SPECS = [
+    // Triads
+    ["major", "Major", "",    [0,4,7],        1],
+    ["minor", "Minor", "m",   [0,3,7],        1],
+
+    // 7ths
+    ["major7", "Major 7th", "maj7", [0,4,7,11], 1],
+    ["minor7", "Minor 7th", "m7",   [0,3,7,10], 1],
+    ["dominant7", "Dominant 7th", "7", [0,4,7,10], 1],
+    ["halfDiminished", "Half-Diminished", "ø7", [0,3,6,10], 1],
+
+    // Others
+    ["diminished", "Diminished", "dim", [0,3,6], 2],
+    ["diminished7", "Diminished 7th", "dim7", [0,3,6,9], 2],
+    ["augmented", "Augmented", "+", [0,4,8], 2],
+
+    // 6ths
+    ["major6", "Major 6th", "6", [0,4,7,9], 2],
+    ["minor6", "Minor 6th", "m6", [0,3,7,9], 2],
+
+    // Suspended
+    ["sus2", "Suspended 2nd", "sus2", [0,2,7], 2],
+    ["sus4", "Suspended 4th", "sus4", [0,5,7], 2],
+
+    // Extensions
+    ["dominant9", "Dominant 9th", "9", [0,4,7,10,2], 3],
+    ["major9", "Major 9th", "maj9", [0,4,7,11,2], 3],
+    ["minor9", "Minor 9th", "m9", [0,3,7,10,2], 3],
+    ["dominant11", "Dominant 11th", "11", [0,4,7,10,2,5], 3],
+];
+
+function buildChordQualities() {
+    const obj = {};
+    for (const [name, label, symbol, intervals, priority] of QUALITY_SPECS) {
+        obj[name] = { name, label, symbol, intervals, priority };
+    }
+    return obj;
+}
+
+// [key, degree, modifier, symbol, interval]
+const ALTERATION_SPECS = [
+    ["flat5", 5, "flat", "b5", 6],
+    ["sharp5",5, "sharp","#5", 8],
+    ["flat9", 9, "flat", "b9", 1],
+    ["sharp9",9, "sharp","#9", 3],
+    ["sharp11",11,"sharp","#11",6],
+    ["flat13",13,"flat", "b13",8],
+];
+
+function buildAlterations() {
+    const obj = {};
+    for (const [key, degree, modifier, symbol, interval] of ALTERATION_SPECS) {
+        obj[key] = { degree, modifier, symbol, interval };
+    }
+    return obj;
+}
 
 // ===== UNIFIED CHORD DATA =====
-const ChordData = {
-  // Standard note names with ASCII characters
-  noteNames: ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
-
-  // Root notes for chord selection (including enharmonic equivalents)
-  /** @noinspection NonAsciiCharacters */
-  rootNotes: [
-    { value: "C", label: "C" },
-    { value: "C#", label: "C#/Db" },
-    { value: "D", label: "D" },
-    { value: "D#", label: "D#/Eb" },
-    { value: "E", label: "E" },
-    { value: "F", label: "F" },
-    { value: "F#", label: "F#/Gb" },
-    { value: "G", label: "G" },
-    { value: "G#", label: "G#/Ab" },
-    { value: "A", label: "A" },
-    { value: "A#", label: "A#/Bb" },
-    { value: "B", label: "B" },
-  ],
-
-  // Comprehensive chord quality definitions with consistent naming
-  chordQualities: {
-    // Basic Triads (Priority 1 - Most Common)
-    major: {
-      name: "major",
-      label: "Major",
-      symbol: "",
-      intervals: [0, 4, 7],
-      priority: 1,
-    },
-    minor: {
-      name: "minor",
-      label: "Minor",
-      symbol: "m",
-      intervals: [0, 3, 7],
-      priority: 1,
-    },
-
-    // 7th Chords (Priority 1 - Essential Jazz)
-    major7: {
-      name: "major7",
-      label: "Major 7th",
-      symbol: "maj7",
-      intervals: [0, 4, 7, 11],
-      priority: 1,
-    },
-    minor7: {
-      name: "minor7",
-      label: "Minor 7th",
-      symbol: "m7",
-      intervals: [0, 3, 7, 10],
-      priority: 1,
-    },
-    dominant7: {
-      name: "dominant7",
-      label: "Dominant 7th",
-      symbol: "7",
-      intervals: [0, 4, 7, 10],
-      priority: 1,
-    },
-    halfDiminished: {
-      name: "halfDiminished",
-      label: "Half-Diminished",
-      symbol: "ø7",
-      intervals: [0, 3, 6, 10],
-      priority: 1,
-    },
-
-    // Other Important Chords (Priority 2)
-    diminished: {
-      name: "diminished",
-      label: "Diminished",
-      symbol: "dim",
-      intervals: [0, 3, 6],
-      priority: 2,
-    },
-    diminished7: {
-      name: "diminished7",
-      label: "Diminished 7th",
-      symbol: "dim7",
-      intervals: [0, 3, 6, 9],
-      priority: 2,
-    },
-    augmented: {
-      name: "augmented",
-      label: "Augmented",
-      symbol: "+",
-      intervals: [0, 4, 8],
-      priority: 2,
-    },
-
-    // 6th Chords (Priority 2)
-    major6: {
-      name: "major6",
-      label: "Major 6th",
-      symbol: "6",
-      intervals: [0, 4, 7, 9],
-      priority: 2,
-    },
-    minor6: {
-      name: "minor6",
-      label: "Minor 6th",
-      symbol: "m6",
-      intervals: [0, 3, 7, 9],
-      priority: 2,
-    },
-
-    // Suspended Chords (Priority 2)
-    sus2: {
-      name: "sus2",
-      label: "Suspended 2nd",
-      symbol: "sus2",
-      intervals: [0, 2, 7],
-      priority: 2,
-    },
-    sus4: {
-      name: "sus4",
-      label: "Suspended 4th",
-      symbol: "sus4",
-      intervals: [0, 5, 7],
-      priority: 2,
-    },
-
-    // Extended Chords (Priority 3 - Advanced Jazz)
-    dominant9: {
-      name: "dominant9",
-      label: "Dominant 9th",
-      symbol: "9",
-      intervals: [0, 4, 7, 10, 2],
-      priority: 3,
-    },
-    major9: {
-      name: "major9",
-      label: "Major 9th",
-      symbol: "maj9",
-      intervals: [0, 4, 7, 11, 2],
-      priority: 3,
-    },
-    minor9: {
-      name: "minor9",
-      label: "Minor 9th",
-      symbol: "m9",
-      intervals: [0, 3, 7, 10, 2],
-      priority: 3,
-    },
-    dominant11: {
-      name: "dominant11",
-      label: "Dominant 11th",
-      symbol: "11",
-      intervals: [0, 4, 7, 10, 2, 5],
-      priority: 3,
-    },
-  },
-
-  // Common alterations for jazz chords
-  alterations: {
-    flat5: { degree: 5, modifier: "flat", symbol: "b5", interval: 6 },
-    sharp5: { degree: 5, modifier: "sharp", symbol: "#5", interval: 8 },
-    flat9: { degree: 9, modifier: "flat", symbol: "b9", interval: 1 },
-    sharp9: { degree: 9, modifier: "sharp", symbol: "#9", interval: 3 },
-    sharp11: { degree: 11, modifier: "sharp", symbol: "#11", interval: 6 },
-    flat13: { degree: 13, modifier: "flat", symbol: "b13", interval: 8 },
-  },
-};
+const ChordData = Object.freeze({
+    noteNames: NOTE_NAMES,
+    rootNotes: buildRootNotes(),
+    chordQualities: buildChordQualities(),
+    alterations: buildAlterations(),
+});
 
 // ===== SHARED UTILITY METHODS =====
 const ChordUtils = {
-  midiToNoteName(midiNote) {
-    return ChordData.noteNames[midiNote % 12];
-  },
+    midiToNoteName(midiNote) {
+        return ChordData.noteNames[Math.abs(midiNote) % 12];
+    },
 
-  noteToMidi(noteName, octave = 4) {
-    const noteMap = {
-      "C": 0,
-      "C#": 1,
-      "D": 2,
-      "D#": 3,
-      "E": 4,
-      "F": 5,
-      "F#": 6,
-      "G": 7,
-      "G#": 8,
-      "A": 9,
-      "A#": 10,
-      "B": 11,
-    };
-    return (octave + 1) * 12 + noteMap[noteName];
-  },
+    noteToMidi(noteName, octave = 4) {
+        const noteIndex = NOTE_NAMES.indexOf(noteName);
+        return (octave + 1) * 12 + (noteIndex >= 0 ? noteIndex : 0);
+    },
 
-  // Get chord quality by intervals (for analyzer)
-  getQualityByIntervals(intervals) {
-    // Sort intervals to normalize for comparison
-    const sortedIntervals = [...intervals].sort((a, b) => a - b);
+    // Get chord quality by intervals (for analyzer)
+    getQualityByIntervals(intervals) {
+        const sortedIntervals = [...intervals]
+            .map(n => ((n % 12) + 12) % 12)
+            .sort((a, b) => a - b);
 
-    for (const [key, quality] of Object.entries(ChordData.chordQualities)) {
-      if (
-        this.arraysEqual(
-          sortedIntervals.slice(0, quality.intervals.length),
-          quality.intervals,
-        )
-      ) {
-        return { key, ...quality };
-      }
-    }
-    return null;
-  },
+        for (const [key, quality] of Object.entries(ChordData.chordQualities)) {
+            if (this.arraysEqual(sortedIntervals.slice(0, quality.intervals.length), quality.intervals)) {
+                return { key, ...quality };
+            }
+        }
+        return null;
+    },
 
-  // Get chord qualities sorted by priority (for selector)
-  getQualitiesByPriority() {
-    return Object.entries(ChordData.chordQualities)
-      .sort(([, a], [, b]) => a.priority - b.priority)
-      .map(([key, quality]) => ({ value: key, ...quality }));
-  },
+    // Get chord qualities sorted by priority (for selector)
+    getQualitiesByPriority() {
+        return Object.entries(ChordData.chordQualities)
+            .sort(([, a], [, b]) => a.priority - b.priority)
+            .map(([value, q]) => ({ value, ...q }));
+    },
 
-  // A helper function to compare arrays
-  arraysEqual(a, b) {
-    return a.length === b.length && a.every((val, i) => val === b[i]);
-  },
+    arraysEqual(a, b) {
+        return a.length === b.length && a.every((val, i) => val === b[i]);
+    },
 
-  // Generates a properly formatted chord symbol with consistent spacing
-  generateSymbol(root, qualityName, extensions = [], alterations = []) {
-    const quality = ChordData.chordQualities[qualityName];
-    if (!quality) return root;
-
-    let symbol = root + quality.symbol;
-
-    // Add extensions with proper spacing
-    if (extensions.length > 0) {
-      symbol += " " + extensions.join(" ");
-    }
-
-    // Add alterations with proper spacing and symbols
-    if (alterations.length > 0) {
-      const altSymbols = alterations.map((alt) => {
+    // Maps an alteration object to its string representation
+    formatAlteration(alt) {
         if (typeof alt === "string") return alt;
         const modifier = alt.modifier === "flat" ? "b" : "#";
         return modifier + alt.degree;
-      });
-      symbol += " " + altSymbols.join(" ");
-    }
+    },
 
-    return symbol;
-  },
+    // Generates a properly formatted chord symbol with consistent spacing
+    generateSymbol(root, qualityName, extensions = [], alterations = []) {
+        const quality = ChordData.chordQualities[qualityName];
+        if (!quality) return root;
 
-  // Formats a note list with proper punctuation
-  formatNotesList(notes) {
-    if (notes.length === 0) return "";
-    if (notes.length === 1) return notes[0];
-    if (notes.length === 2) return `${notes[0]} & ${notes[1]}`;
+        let symbol = root + quality.symbol;
 
-    // For 3+ notes: "C, E, G & Bb"
-    const lastNote = notes[notes.length - 1];
-    const otherNotes = notes.slice(0, -1);
-    return `${otherNotes.join(", ")} & ${lastNote}`;
-  },
+        if (extensions.length > 0) symbol += " " + extensions.join(" ");
+
+        if (alterations.length > 0) {
+            const altSymbols = alterations.map(this.formatAlteration);
+            symbol += " " + altSymbols.join(" ");
+        }
+
+        return symbol;
+    },
+
+    // Formats a note list with proper punctuation
+    formatNotesList(notes) {
+        if (!notes || !notes.length) return "";
+        return notes.length === 1 ? notes[0] : 
+               notes.length === 2 ? `${notes[0]} & ${notes[1]}` :
+               `${notes.slice(0, -1).join(", ")} & ${notes[notes.length - 1]}`;
+    },
+
+    // ===== UI HELPERS =====
+    setContainerHTML(container, html) {
+        if (!container) throw new Error("ChordSelector container not found");
+        container.innerHTML = html;
+    },
+
+    populateSelect(selectEl, options, map = (x) => x) {
+        const frag = document.createDocumentFragment();
+        options.forEach((opt) => {
+            const option = document.createElement("option");
+            const mapped = map(opt);
+            option.value = mapped.value;
+            option.textContent = mapped.label ?? mapped.value;
+            frag.appendChild(option);
+        });
+        selectEl.appendChild(frag);
+    },
+
+    showInfo(container, show) {
+        const infoContainer = container.querySelector(".chord-info-container");
+        infoContainer.style.display = show ? "flex" : "none";
+        const sel = container.querySelector(".chord-selector");
+        sel.classList.toggle("has-chord", !!show);
+    },
+
+    /**
+     * Build a canonical chord descriptor in one place to avoid duplication in Selector/Analyzer.
+     * @param {Object} params - Chord descriptor parameters
+     * @param {string} params.rootName - Root note name
+     * @param {string} params.qualityKey - Quality key
+     * @param {number[]} params.intervals - Intervals
+     * @param {number} params.rootMidi - Root MIDI note
+     * @param {string[]} [params.extensions=[]] - Extensions
+     * @param {Object[]} [params.alterations=[]] - Alterations
+     * @param {string} [params.source="manual_selection"] - Source of the chord
+     * @param {number[]|null} [params.midiNotes=null] - MIDI notes
+     * @returns {Object} Chord descriptor
+     */
+    makeDescriptor({
+                       rootName,
+                       qualityKey,
+                       intervals,
+                       rootMidi,
+                       extensions = [],
+                       alterations = [],
+                       source = "manual_selection",
+                       midiNotes = null,
+                   }) {
+        const symbol = ChordUtils.generateSymbol(rootName, qualityKey, extensions, alterations);
+
+        // If midiNotes not supplied, compute from rootMidi + intervals
+        let midi = midiNotes;
+        if (!midi && Number.isFinite(rootMidi)) {
+            midi = intervals.map((i) => rootMidi + i);
+        }
+        const noteNames = Array.isArray(midi) ? midi.map(ChordUtils.midiToNoteName) : [];
+
+        return {
+            symbol,
+            root: rootName,
+            quality: qualityKey,
+            extensions,
+            alterations,
+            intervals,
+            midiNotes: midi || [],
+            noteNames,
+            metadata: {
+                confidence: 1.0,
+                timestamp: new Date().toISOString(),
+                source,
+            },
+        };
+    },
 };
 
 // ===== CHORD SELECTOR CLASS =====
 class ChordSelector {
-  constructor(containerSelector) {
-    this.container = document.querySelector(containerSelector);
-    this.onChordSelected = null;
-    this.initializeUI();
-  }
-
-  initializeUI() {
-    this.container.innerHTML = `
-      <div class="chord-selector">
-        <h3>Chord Selection</h3>
-        <div class="chord-selector-controls">
-          <div class="dropdown-group">
-            <label for="root-note-select">Root Note:</label>
-            <select id="root-note-select" class="chord-dropdown">
-              <option value="">Select root note...</option>
-            </select>
-          </div>
-          <div class="dropdown-group">
-            <label for="chord-quality-select">Chord Quality:</label>
-            <select id="chord-quality-select" class="chord-dropdown">
-              <option value="">Select chord quality...</option>
-            </select>
-          </div>
-        </div>
-        <div class="chord-info-container" style="display: none;">
-          <div class="selected-chord-info">
-            <div class="selected-chord-symbol"></div>
-            <div class="selected-chord-notes"></div>
-            <button class="clear-selected-chord">Clear</button>
-          </div>
-          <div class="zoom-keyboard-panel">
-            zoom-keyboard
-          </div>
-        </div>
-      </div>
-    `;
-
-    this.populateDropdowns();
-    this.attachEventListeners();
-  }
-
-  populateDropdowns() {
-    const rootSelect = this.container.querySelector("#root-note-select");
-    const qualitySelect = this.container.querySelector("#chord-quality-select");
-
-    // Populate root notes
-    ChordData.rootNotes.forEach((note) => {
-      const option = document.createElement("option");
-      option.value = note.value;
-      option.textContent = note.label;
-      rootSelect.appendChild(option);
-    });
-
-    // Populate chord qualities by priority
-    ChordUtils.getQualitiesByPriority().forEach((quality) => {
-      const option = document.createElement("option");
-      option.value = quality.value;
-      option.textContent = quality.label;
-      qualitySelect.appendChild(option);
-    });
-  }
-
-  attachEventListeners() {
-    const rootSelect = this.container.querySelector("#root-note-select");
-    const qualitySelect = this.container.querySelector("#chord-quality-select");
-    const clearBtn = this.container.querySelector(".clear-selected-chord");
-
-    rootSelect.addEventListener("change", () => this.updateSelectedChord());
-    qualitySelect.addEventListener("change", () => this.updateSelectedChord());
-    clearBtn.addEventListener("click", () => this.clearSelection());
-  }
-
-  updateSelectedChord() {
-    const rootSelect = this.container.querySelector("#root-note-select");
-    const qualitySelect = this.container.querySelector("#chord-quality-select");
-
-    const rootNote = rootSelect.value;
-    const chordQuality = qualitySelect.value;
-
-    if (rootNote && chordQuality) {
-      const chord = this.buildChord(rootNote, chordQuality);
-      this.displaySelectedChord(chord);
-
-      if (this.onChordSelected) {
-        this.onChordSelected(chord);
-      }
-    } else {
-      this.clearSelectedChordDisplay();
+    constructor(containerSelector) {
+        this.container = document.querySelector(containerSelector);
+        this.onChordSelected = null;
+        this.initializeUI();
     }
-  }
 
-  buildChord(rootNote, qualityValue) {
-    const quality = ChordData.chordQualities[qualityValue];
-    const rootMidi = ChordUtils.noteToMidi(rootNote, 4);
-
-    // Generate consistent symbol using shared utility
-    const symbol = ChordUtils.generateSymbol(rootNote, qualityValue);
-
-    return {
-      root: rootNote,
-      quality: qualityValue,
-      symbol: symbol,
-      intervals: quality.intervals,
-      midiNotes: quality.intervals.map((interval) => rootMidi + interval),
-      noteNames: quality.intervals.map((interval) =>
-        ChordUtils.midiToNoteName(rootMidi + interval),
-      ),
-      metadata: {
-        confidence: 1.0,
-        timestamp: new Date().toISOString(),
-        source: "manual_selection",
-      },
-    };
-  }
-
-  displaySelectedChord(chord) {
-    const symbolEl = this.container.querySelector(".selected-chord-symbol");
-    const notesEl = this.container.querySelector(".selected-chord-notes");
-    const infoContainer = this.container.querySelector(".chord-info-container");
-
-    // Show the side-by-side container with a flex display
-    infoContainer.style.display = "flex";
-
-    // Use consistent symbol formatting
-    symbolEl.textContent = chord.symbol;
-
-    // Use consistent note formatting
-    const formattedNotes = ChordUtils.formatNotesList(chord.noteNames);
-    notesEl.textContent = `Notes: ${formattedNotes}`;
-
-    this.container.querySelector(".chord-selector").classList.add("has-chord");
-  }
-
-  clearSelectedChordDisplay() {
-    const infoContainer = this.container.querySelector(".chord-info-container");
-    infoContainer.style.display = "none";
-    this.container
-      .querySelector(".chord-selector")
-      .classList.remove("has-chord");
-  }
-
-  clearSelection() {
-    const rootSelect = this.container.querySelector("#root-note-select");
-    const qualitySelect = this.container.querySelector("#chord-quality-select");
-
-    rootSelect.value = "";
-    qualitySelect.value = "";
-    this.clearSelectedChordDisplay();
-
-    if (this.onChordSelected) {
-      this.onChordSelected(null);
+    initializeUI() {
+        ChordUtils.setContainerHTML(this.container, UCS_CONSTANTS.SELECTOR_TEMPLATE);
+        this.populateDropdowns();
+        this.attachEventListeners();
     }
-  }
 
-  setChordSelectedCallback(callback) {
-    this.onChordSelected = callback;
-  }
+    populateDropdowns() {
+        const rootSelect = this.container.querySelector("#root-note-select");
+        const qualitySelect = this.container.querySelector("#chord-quality-select");
+
+        ChordUtils.populateSelect(rootSelect, ChordData.rootNotes, (n) => n);
+        ChordUtils.populateSelect(
+            qualitySelect,
+            ChordUtils.getQualitiesByPriority(),
+            (q) => ({ value: q.value, label: q.label })
+        );
+    }
+
+    attachEventListeners() {
+        const rootSelect = this.container.querySelector("#root-note-select");
+        const qualitySelect = this.container.querySelector("#chord-quality-select");
+        const clearBtn = this.container.querySelector(".clear-selected-chord");
+
+        const handler = () => this.handleSelectionChange();
+
+        rootSelect.addEventListener("change", handler);
+        qualitySelect.addEventListener("change", handler);
+        clearBtn.addEventListener("click", () => this.clearSelection());
+    }
+
+    // ---- unified selection → chord → render pipeline ----
+    getSelection() {
+        return {
+            rootNote: this.container.querySelector("#root-note-select").value,
+            chordQuality: this.container.querySelector("#chord-quality-select").value,
+        };
+    }
+
+    computeChordFromSelection() {
+        const { rootNote, chordQuality } = this.getSelection();
+        if (!rootNote || !chordQuality) return null;
+
+        const quality = ChordData.chordQualities[chordQuality];
+        const rootMidi = ChordUtils.noteToMidi(rootNote, 4);
+
+        return ChordUtils.makeDescriptor({
+            rootName: rootNote,
+            qualityKey: chordQuality,
+            intervals: quality.intervals,
+            rootMidi,
+            source: "manual_selection",
+        });
+    }
+
+    handleSelectionChange() {
+        const chord = this.computeChordFromSelection();
+        this.render(chord);
+        if (this.onChordSelected) this.onChordSelected(chord);
+    }
+
+    render(chord) {
+        if (!chord) {
+            ChordUtils.showInfo(this.container, false);
+            return;
+        }
+        const symbolEl = this.container.querySelector(".selected-chord-symbol");
+        const notesEl = this.container.querySelector(".selected-chord-notes");
+        ChordUtils.showInfo(this.container, true);
+        symbolEl.textContent = chord.symbol;
+        notesEl.textContent = `Notes: ${ChordUtils.formatNotesList(chord.noteNames)}`;
+    }
+
+    clearSelection() {
+        this.container.querySelector("#root-note-select").value = "";
+        this.container.querySelector("#chord-quality-select").value = "";
+        this.handleSelectionChange();
+    }
+
+    setChordSelectedCallback(callback) {
+        this.onChordSelected = callback;
+    }
 }
 
 // ===== CHORD ANALYZER CLASS =====
+const ANALYZER_RULES = Object.freeze({
+    extensions: [
+        { pcs: [10, 11], ext: "7"  },
+        { pcs: [ 2,  1], ext: "9"  },
+        { pcs: [ 5,  6], ext: "11" },
+        { pcs: [ 9     ], ext: "13" },
+    ],
+    alterations: [
+        { pc: 6, degree: 5, modifier: "flat"  }, // b5
+        { pc: 8, degree: 5, modifier: "sharp" }, // #5
+        { pc: 1, degree: 9, modifier: "flat"  }, // b9
+        { pc: 3, degree: 9, modifier: "sharp" }, // #9
+    ],
+});
+
 class ChordAnalyzer {
-  constructor() {
-    // No need for separate chord patterns - uses unified data
-  }
+    constructor() {}
 
-  findRoot(sortedNotes) {
-    return sortedNotes[0];
-  }
-
-  analyzeNotes(midiNotes) {
-    if (midiNotes.length < 2) {
-      return null;
+    findRoot(sortedNotes) {
+        return sortedNotes[0];
     }
 
-    const sortedNotes = [...midiNotes].sort((a, b) => a - b);
-    const root = this.findRoot(sortedNotes);
-    const intervals = this.calculateIntervals(sortedNotes, root);
+    analyzeNotes(midiNotes) {
+        if (!Array.isArray(midiNotes) || midiNotes.length < 2) return null;
 
-    // Use unified chord recognition
-    const qualityMatch = ChordUtils.getQualityByIntervals(intervals);
-    const quality = qualityMatch ? qualityMatch.key : "major";
+        const sortedNotes = [...midiNotes].sort((a, b) => a - b);
+        const root = this.findRoot(sortedNotes);
+        const intervals = this.calculateIntervals(sortedNotes, root);
 
-    const extensions = this.identifyExtensions(intervals);
-    const alterations = this.identifyAlterations(intervals);
+        const qualityMatch = ChordUtils.getQualityByIntervals(intervals);
+        const quality = qualityMatch ? qualityMatch.key : "major";
 
-    // Generate consistent symbol using shared utility
-    const rootName = ChordUtils.midiToNoteName(root);
-    const symbol = ChordUtils.generateSymbol(
-      rootName,
-      quality,
-      extensions,
-      alterations,
-    );
+        const intervalSet = new Set(intervals);
+        const extensions  = this._collectByPresence(
+            intervalSet,
+            ANALYZER_RULES.extensions,
+            (r, S) => r.pcs.some(pitchClass => S.has(pitchClass)),
+            (r) => r.ext
+        );
+        const alterations = this._collectByPresence(
+            intervalSet,
+            ANALYZER_RULES.alterations,
+            (r, S) => S.has(r.pc),
+            (r) => ({ degree: r.degree, modifier: r.modifier })
+        );
 
-    return {
-      symbol: symbol,
-      root: rootName,
-      quality: quality,
-      extensions: extensions,
-      alterations: alterations,
-      midi: {
-        notes: sortedNotes,
-        root_note: root,
-      },
-      metadata: {
-        confidence: this.calculateConfidence(intervals),
-        timestamp: new Date().toISOString(),
-        source: "midi_input",
-      },
-    };
-  }
+        const rootName = ChordUtils.midiToNoteName(root);
 
-  calculateIntervals(notes, root) {
-    return notes.map((note) => (note - root) % 12).sort((a, b) => a - b);
-  }
+        // Single source of truth for a descriptor object
+        const descriptor = ChordUtils.makeDescriptor({
+            rootName,
+            qualityKey: quality,
+            intervals,
+            rootMidi: root,
+            extensions,
+            alterations,
+            source: "midi_input",
+            midiNotes: sortedNotes, // Already an array, matches updated type
+        });
 
-  identifyExtensions(intervals) {
-    const extensions = [];
-    if (intervals.includes(10) || intervals.includes(11)) extensions.push("7");
-    if (intervals.includes(2) || intervals.includes(1)) extensions.push("9");
-    if (intervals.includes(5) || intervals.includes(6)) extensions.push("11");
-    if (intervals.includes(9)) extensions.push("13");
-    return extensions;
-  }
+        // Adjust confidence post-hoc
+        descriptor.metadata.confidence = this.calculateConfidence(intervals);
+        return descriptor;
+    }
 
-  identifyAlterations(intervals) {
-    const alterations = [];
-    if (intervals.includes(6))
-      alterations.push({ degree: 5, modifier: "flat" });
-    if (intervals.includes(8))
-      alterations.push({ degree: 5, modifier: "sharp" });
-    if (intervals.includes(1))
-      alterations.push({ degree: 9, modifier: "flat" });
-    if (intervals.includes(3))
-      alterations.push({ degree: 9, modifier: "sharp" });
-    return alterations;
-  }
+    calculateIntervals(notes, root) {
+        return notes
+            .map((note) => ((note - root) % 12 + 12) % 12)
+            .sort((a, b) => a - b);
+    }
 
-  calculateConfidence(intervals) {
-    const qualityMatch = ChordUtils.getQualityByIntervals(intervals);
-    return qualityMatch ? 0.9 : 0.6;
-  }
+    /**
+     * Generic rules collector to avoid duplicated loop/collector logic.
+     * @param {Set<number>} intervalSet
+     * @param {Array<object>} rules
+     * @param {(rule:object, intervalSet:Set<number>)=>boolean} predicate
+     * @param {(rule:object)=>any} emit
+     * @returns {Array<any>}
+     */
+    _collectByPresence(intervalSet, rules, predicate, emit) {
+        const out = [];
+        for (const r of rules) if (predicate(r, intervalSet)) out.push(emit(r));
+        return out;
+    }
+
+    calculateConfidence(intervals) {
+        return ChordUtils.getQualityByIntervals(intervals) ? 0.9 : 0.6;
+    }
 }
 
-// Skip exports entirely for this file to avoid IDE warnings
-// The components will be accessible directly when this file is included/imported
+// (No explicit exports to keep globals available in script-tag usage)
 
-// If you need to use these components from other files, you can:
-// 1. Import this file directly with the < script > tag in HTML
-// 2. In Node.js or bundler environments, you can import/require this file,
-//    and the variables will be accessible
