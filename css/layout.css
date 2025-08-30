@@ -21,29 +21,58 @@ header h1 {
 }
 
 /* Tabs */
+/* Wrapper to constrain width + content height */
+.tab-wrapper {
+    width: 1140px;          /* fixed width */
+    margin: 0 auto;         /* center on page */
+}
+
 .tabs {
     display: flex;
-    background: #444;
+    gap: 0;                 /* no gaps for a true nav feel */
+    background: #fff;       /* or keep #444 if you prefer dark */
+    border-bottom: 1px solid #ddd;
 }
 
 .tabs button {
-    flex: 1;
-    padding: 0.4rem 0.6rem; /* smaller padding */
+    appearance: none;
     border: none;
-    background: #444;
-    color: white;
+    background: transparent;
+    color: #333;
     cursor: pointer;
-    font-size: 0.9rem;       /* slightly smaller text */
-    line-height: 1.2;        /* keeps buttons shorter */
+
+    /* slim height */
+    padding: 0.5rem 0.9rem;
+    line-height: 1.2;
+    font-size: 0.95rem;
+    font-weight: 600;
+
+    /* nav-like look */
+    border-bottom: 2px solid transparent;
+    transition: color .15s ease, border-color .15s ease, background-color .15s ease;
+}
+
+.tabs button:hover {
+    color: #111;
+    background: rgba(0,0,0,0.04); /* light hover wash */
 }
 
 .tabs button.active {
-    background: #666;
+    color: #111;
+    border-bottom-color: #3a7bfd; /* accent underline */
 }
 
+/* Fixed content area size */
 .tab-content {
-    padding: 0.6rem;         /* compact content padding */
+    width: 1140px;          /* match wrapper */
+    height: 400px;          /* fixed height requested */
+    box-sizing: border-box;
     border: 1px solid #ccc;
+    border-top: none;       /* joins with the tab bar line */
+    padding: 0.75rem;
+    overflow: auto;         /* scroll if content exceeds 400px */
+    background: #fff;
+    margin: 0 auto;         /* center if used outside .tab-wrapper */
 }
 
 .tab-content section {
