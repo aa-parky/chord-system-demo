@@ -221,6 +221,17 @@ let global;
       padding: 10px;
     }
 
+.selected-chord-symbol:empty::before {
+  content: "–";
+  color: #ccc;
+}
+
+.selected-chord-notes:empty::before {
+  content: "No chord selected.";
+  color: #aaa;
+  font-size: 14px;
+}
+
     .selected-chord-info {
       flex: 1;
       padding-right: 5px;
@@ -693,7 +704,7 @@ let global;
               </select>
             </div>
           </div>
-          <div class="chord-info-container" style="display: none;">
+          <div class="chord-info-container">
             <div class="selected-chord-info">
               <div class="selected-chord-symbol"></div>
               <div class="selected-chord-notes"></div>
@@ -837,7 +848,8 @@ let global;
 
         clearSelectedChordDisplay() {
             const infoContainer = this.container.querySelector(".chord-info-container");
-            infoContainer.style.display = "none";
+            infoContainer.querySelector(".selected-chord-symbol").textContent = "";
+            infoContainer.querySelector(".selected-chord-notes").textContent = "";
             this.container
                 .querySelector(".chord-selector")
                 .classList.remove("has-chord");
