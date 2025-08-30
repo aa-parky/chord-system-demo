@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tonika Bundle</title>
+</head>
+<body>
+
+<div class="demo-section">
+    <div id="chord-selector"></div>
+    <div id="keyboard-demo"></div>
+</div>
+
+<div id="piano-container"></div>
+
+<!-- Include the chord system bundle -->
+<script src="js/chord-system-bundle.js"></script>
+<!-- Include the bundled file -->
+<script src="js/bundled-clavonika.js"></script>
+
+<script>
+    // Initialize the chord selector
+    const chordSelector = ChordSystem.init('#chord-selector');
+
+    // Use the chordSelector
+    chordSelector.setChordSelectedCallback((chord) => {
+        console.log('Chord selected:', chord);
+    });
+
+</script>
+
+
+<script>
+    // initialize piano
+    const piano = Clavonika.init('piano-container');
+</script>
+
+</body>
+</html>
