@@ -4,6 +4,7 @@
  * Can be dropped into any webpage with a single script tag
  */
 
+let global;
 (function(global) {
   'use strict';
 
@@ -172,11 +173,11 @@
     /* Chord Selector Styles */
     .chord-selector {
       font-family: Arial, sans-serif;
-      padding: 15px;
+     padding: 5px;
       background-color: #f5f5f5;
       border-radius: 4px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      max-width: 600px;
+      width: 795px;
       margin: 0 auto;
     }
 
@@ -203,7 +204,7 @@
     }
 
     .chord-dropdown {
-      width: 100%;
+      width: 50%;
       padding: 8px;
       border: 1px solid #ddd;
       border-radius: 4px;
@@ -213,6 +214,7 @@
     .chord-info-container {
       display: flex;
       background-color: #fff;
+      width: 770px;
       border: 1px solid #ddd;
       border-radius: 4px;
       padding: 10px;
@@ -220,7 +222,7 @@
 
     .selected-chord-info {
       flex: 1;
-      padding-right: 15px;
+      padding-right: 5px;
     }
 
     .selected-chord-symbol {
@@ -232,14 +234,14 @@
     .selected-chord-notes {
       font-size: 16px;
       color: #666;
-      margin-bottom: 15px;
+      margin-bottom: 5px;
     }
 
     .clear-selected-chord {
       background-color: #f44336;
       color: white;
       border: none;
-      padding: 8px 15px;
+      padding: 8px 5px;
       border-radius: 4px;
       cursor: pointer;
       font-size: 14px;
@@ -457,38 +459,15 @@
       };
       return (octave + 1) * 12 + noteMap[noteName];
     },
-
-    // Gets a chord quality by analyzing intervals
-    getQualityByIntervals(intervals) {
-      // Sort intervals to normalize for comparison
-      const sortedIntervals = [...intervals].sort((a, b) => a - b);
-
-      for (const [key, quality] of Object.entries(ChordData.chordQualities)) {
-        if (
-          this.arraysEqual(
-            sortedIntervals.slice(0, quality.intervals.length),
-            quality.intervals,
-          )
-        ) {
-          return { key, ...quality };
-        }
-      }
-      return null;
-    },
-
-    // Gets chord qualities sorted by priority (for selector)
+// Gets a chord quality by analyzing intervals
+// Gets chord qualities sorted by priority (for selector)
     getQualitiesByPriority() {
       return Object.entries(ChordData.chordQualities)
         .sort(([, a], [, b]) => a.priority - b.priority)
         .map(([key, quality]) => ({ value: key, ...quality }));
     },
-
-    // A helper function to compare arrays
-    arraysEqual(a, b) {
-      return a.length === b.length && a.every((val, i) => val === b[i]);
-    },
-
-    // Generates a properly formatted chord symbol with consistent spacing
+// A helper function to compare arrays
+// Generates a properly formatted chord symbol with consistent spacing
     generateSymbol(root, qualityName, extensions = [], alterations = []) {
       const quality = ChordData.chordQualities[qualityName];
       if (!quality) return root;
@@ -697,7 +676,12 @@
       this.attachEventListeners();
 
       // Create the keyboard
-      this.keyboard = new ZoomedKeyboard(this.container.querySelector('.zoom-keyboard-panel'));
+      const keyboardPanel = this.container.querySelector('.zoom-keyboard-panel');
+      if (keyboardPanel) {
+        this.keyboard = new ZoomedKeyboard(keyboardPanel);
+      } else {
+        console.error('Chord System: Keyboard panel not found');
+      }
     }
 
     populateDropdowns() {
@@ -747,10 +731,14 @@
         }
 
         // Highlight the chord notes on the keyboard
-        this.keyboard.highlightChordNotes(chord.midiNotes);
+        if (this.keyboard) {
+          this.keyboard.highlightChordNotes(chord.midiNotes);
+        }
       } else {
         this.clearSelectedChordDisplay();
-        this.keyboard.clearHighlights();
+        if (this.keyboard) {
+          this.keyboard.clearHighlights();
+        }
       }
     }
 
@@ -783,7 +771,7 @@
       const notesEl = this.container.querySelector(".selected-chord-notes");
       const infoContainer = this.container.querySelector(".chord-info-container");
 
-      // Show the side-by-side container with flex display
+      // Show the side-by-side container with a flex display
       infoContainer.style.display = "flex";
 
       // Use consistent symbol formatting
@@ -811,7 +799,9 @@
       rootSelect.value = "";
       qualitySelect.value = "";
       this.clearSelectedChordDisplay();
-      this.keyboard.clearHighlights();
+      if (this.keyboard) {
+        this.keyboard.clearHighlights();
+      }
 
       if (this.onChordSelected) {
         this.onChordSelected(null);
@@ -828,95 +818,11 @@
   //==================================================
 
   // ===== CHORD ANALYZER CLASS =====
-  class ChordAnalyzer {
-    constructor() {
-      // No need for separate chord patterns - uses unified data
-    }
-
-    findRoot(sortedNotes) {
-      return sortedNotes[0];
-    }
-
-    analyzeNotes(midiNotes) {
-      if (midiNotes.length < 2) {
-        return null;
-      }
-
-      const sortedNotes = [...midiNotes].sort((a, b) => a - b);
-      const root = this.findRoot(sortedNotes);
-      const intervals = this.calculateIntervals(sortedNotes, root);
-
-      // Use unified chord recognition
-      const qualityMatch = ChordUtils.getQualityByIntervals(intervals);
-      const quality = qualityMatch ? qualityMatch.key : "major";
-
-      const extensions = this.identifyExtensions(intervals);
-      const alterations = this.identifyAlterations(intervals);
-
-      // Generate consistent symbol using shared utility
-      const rootName = ChordUtils.midiToNoteName(root);
-      const symbol = ChordUtils.generateSymbol(
-        rootName,
-        quality,
-        extensions,
-        alterations,
-      );
-
-      return {
-        symbol: symbol,
-        root: rootName,
-        quality: quality,
-        extensions: extensions,
-        alterations: alterations,
-        midi: {
-          notes: sortedNotes,
-          root_note: root,
-        },
-        metadata: {
-          confidence: this.calculateConfidence(intervals),
-          timestamp: new Date().toISOString(),
-          source: "midi_input",
-        },
-      };
-    }
-
-    calculateIntervals(notes, root) {
-      return notes.map((note) => (note - root) % 12).sort((a, b) => a - b);
-    }
-
-    identifyExtensions(intervals) {
-      const extensions = [];
-      if (intervals.includes(10) || intervals.includes(11)) extensions.push("7");
-      if (intervals.includes(2) || intervals.includes(1)) extensions.push("9");
-      if (intervals.includes(5) || intervals.includes(6)) extensions.push("11");
-      if (intervals.includes(9)) extensions.push("13");
-      return extensions;
-    }
-
-    identifyAlterations(intervals) {
-      const alterations = [];
-      if (intervals.includes(6))
-        alterations.push({ degree: 5, modifier: "flat" });
-      if (intervals.includes(8))
-        alterations.push({ degree: 5, modifier: "sharp" });
-      if (intervals.includes(1))
-        alterations.push({ degree: 9, modifier: "flat" });
-      if (intervals.includes(3))
-        alterations.push({ degree: 9, modifier: "sharp" });
-      return alterations;
-    }
-
-    calculateConfidence(intervals) {
-      const qualityMatch = ChordUtils.getQualityByIntervals(intervals);
-      return qualityMatch ? 0.9 : 0.6;
-    }
-  }
-
-  //==================================================
+//==================================================
   // 7. PUBLIC API & INITIALIZATION
   //==================================================
 
-  // Initialize the styles once
+  // Initialize the styles at once
   function initializeStyles() {
     if (!document.getElementById('chord-system-styles')) {
       const styleElement = document.createElement('style');
@@ -926,57 +832,50 @@
     }
   }
 
-  // Main public API for chord system
-  const ChordSystem = {
-    // Initialize the chord system in a container
-    init: function(selectorOrElement) {
-      initializeStyles();
+  // Main public API for the chord system
+    // Export to global scope
+  global.ChordSystem = {
+      // Initialize the chord system in a container
+      init: function (selectorOrElement) {
+          initializeStyles();
 
-      let container;
-      if (typeof selectorOrElement === 'string') {
-        container = document.querySelector(selectorOrElement);
-      } else {
-        container = selectorOrElement;
-      }
+          let container;
+          if (typeof selectorOrElement === 'string') {
+              container = document.querySelector(selectorOrElement);
+          } else {
+              container = selectorOrElement;
+          }
 
-      if (!container) {
-        console.error('Chord System: Container not found');
-        return null;
-      }
+          if (!container) {
+              console.error('Chord System: Container not found for selector', selectorOrElement);
+              return null;
+          }
 
-      return new ChordSelector(container);
-    },
+          return new ChordSelector(container);
+      },
 
-    // Create a standalone keyboard
-    createKeyboard: function(selectorOrElement) {
-      initializeStyles();
+      // Create a standalone keyboard
+      createKeyboard: function (selectorOrElement) {
+          initializeStyles();
 
-      let container;
-      if (typeof selectorOrElement === 'string') {
-        container = document.querySelector(selectorOrElement);
-      } else {
-        container = selectorOrElement;
-      }
+          let container;
+          if (typeof selectorOrElement === 'string') {
+              container = document.querySelector(selectorOrElement);
+          } else {
+              container = selectorOrElement;
+          }
 
-      if (!container) {
-        console.error('Chord System: Container not found');
-        return null;
-      }
+          if (!container) {
+              console.error('Chord System: Container not found');
+              return null;
+          }
 
-      return new ZoomedKeyboard(container);
-    },
-
-    // Create a chord analyzer
-    createAnalyzer: function() {
-      return new ChordAnalyzer();
-    },
-
-    // Access to utilities and data
-    utils: ChordUtils,
-    data: ChordData
+          return new ZoomedKeyboard(container);
+      },
+// Create a chord analyzer
+// Access to utilities and data
+      utils: ChordUtils,
+      data: ChordData
   };
 
-  // Export to global scope
-  global.ChordSystem = ChordSystem;
-
-})(typeof window !== 'undefined' ? window : this);
+})(typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : self);
