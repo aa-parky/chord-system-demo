@@ -10,8 +10,14 @@ body {
 header {
     background: #333;
     color: white;
-    padding: 1rem;
+    padding: 0.25rem 0.5rem;  /* less padding top/bottom */
     text-align: center;
+}
+
+header h1 {
+    margin: 0;         /* remove default browser margin */
+    font-size: 1.25rem; /* smaller text if you want */
+    line-height: 1.5;  /* tighter vertical spacing */
 }
 
 /* Tabs */
@@ -22,11 +28,13 @@ header {
 
 .tabs button {
     flex: 1;
-    padding: 1rem;
+    padding: 0.4rem 0.6rem; /* smaller padding */
     border: none;
     background: #444;
     color: white;
     cursor: pointer;
+    font-size: 0.9rem;       /* slightly smaller text */
+    line-height: 1.2;        /* keeps buttons shorter */
 }
 
 .tabs button.active {
@@ -34,7 +42,7 @@ header {
 }
 
 .tab-content {
-    padding: 1rem;
+    padding: 0.6rem;         /* compact content padding */
     border: 1px solid #ccc;
 }
 
@@ -51,5 +59,11 @@ footer {
     background: #333;
     color: white;
     text-align: center;
-    padding: 0.5rem;
+    padding: 0.25rem 0.5rem; /* smaller padding top/bottom */
+    font-size: 0.9rem;       /* slightly smaller text if desired */
+    line-height: 1.4;        /* compact vertical spacing */
+}
+
+footer p {
+    margin: 0; /* reset default paragraph margin */
 }
