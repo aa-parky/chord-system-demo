@@ -3,15 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <title>Tonika Bundle</title>
+    <link rel="stylesheet" href="css/layout.css" />
 </head>
 <body>
 
-<div class="demo-section">
-    <div id="chord-selector"></div>
-    <div id="keyboard-demo"></div>
+<header>
+    <h1>Tonika</h1>
+</header>
+
+<!-- Tabs -->
+<div class="tabs">
+    <button class="active" onclick="openTab(0)">Tab 1</button>
+    <button onclick="openTab(1)">Tab 2</button>
+    <button onclick="openTab(2)">Tab 3</button>
+    <button onclick="openTab(3)">Tab 4</button>
+    <button onclick="openTab(4)">Tab 5</button>
+    <button onclick="openTab(5)">Tab 6</button>
 </div>
 
-<div id="piano-container"></div>
+<div class="tab-content">
+    <section class="active">
+        <div id="chord-selector"></div>
+        <div id="keyboard-demo"></div>
+    </section>
+    <section>Content for Tab 2</section>
+    <section>Content for Tab 3</section>
+    <section>Content for Tab 4</section>
+    <section>Content for Tab 5</section>
+    <section>Content for Tab 6</section>
+</div>
+
+<!-- Keyboard -->
+<div class="roll88">
+    <div id="piano-container"></div>
+</div>
+
+<footer>
+    <p>© 2025 My Piano Project</p>
+</footer>
+
+<script>
+    function openTab(index) {
+        const tabs = document.querySelectorAll('.tabs button');
+        const sections = document.querySelectorAll('.tab-content section');
+
+        tabs.forEach((tab, i) => {
+            tab.classList.toggle('active', i === index);
+            sections[i].classList.toggle('active', i === index);
+        });
+    }
+</script>
 
 <!-- Include the chord system bundle -->
 <script src="js/chord-system-bundle.js"></script>
@@ -28,7 +69,6 @@
     });
 
 </script>
-
 
 <script>
     // initialize piano
