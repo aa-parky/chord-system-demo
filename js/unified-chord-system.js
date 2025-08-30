@@ -411,7 +411,7 @@ class ChordAnalyzer {
             extensions,
             alterations,
             source: "midi_input",
-            midiNotes: sortedNotes, // Already an array, matches updated type
+            midiNotes: sortedNotes, // Already an array matches the updated type
         });
 
         // Adjust confidence post-hoc
