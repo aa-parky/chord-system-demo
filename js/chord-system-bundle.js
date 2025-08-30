@@ -29,6 +29,7 @@ let global;
       height: 100%;
     }
 
+
     .zoomed-keyboard__key--white {
       position: absolute;
       width: 35px;
