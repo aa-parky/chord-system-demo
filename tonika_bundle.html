@@ -70,6 +70,7 @@
 <script src="js/chordonika-bundle.js"></script>
 <!-- Include the bundled file -->
 <script src="js/bundled-clavonika.js"></script>
+<script src="js/jackonika.js"></script>
 
 <script>
     // Initialize the chord selector
@@ -85,6 +86,16 @@
 <script>
     // initialize piano
     window.piano = Clavonika.init('piano-container');
+</script>
+
+    // initialize jackonika
+<script>
+    const piano = Clavonika.init('piano-container');
+
+    Jackonika.init({
+        onNoteOn:  (note, vel) => piano.noteOn?.(note),
+        onNoteOff: (note)      => piano.noteOff?.(note),
+    });
 </script>
 
 </body>
