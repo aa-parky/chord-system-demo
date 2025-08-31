@@ -18,25 +18,37 @@
     <button onclick="openTab(2)">Tab 3</button>
     <button onclick="openTab(3)">Tab 4</button>
     <button onclick="openTab(4)">Tab 5</button>
-    <button onclick="openTab(5)">Tab 6</button>
+    <button onclick="openTab(5)">Midonika</button>
 </div>
 
 <div class="tab-content">
     <section class="active">
         <div id="chord-selector"></div>
-        <div id="keyboard-demo"></div>
     </section>
     <section>Content for Tab 2</section>
     <section>Content for Tab 3</section>
     <section>Content for Tab 4</section>
     <section>Content for Tab 5</section>
-    <section>Content for Tab 6</section>
+    <section>
+        <!-- Container for the MIDI component -->
+        <div id="midi-component"></div>
+
+        <!-- Include the script -->
+        <script src="js/midonika.js"></script>
+
+        <!-- Initialize the component -->
+        <script>
+            window.midonika = new Midonika('midi-component');
+        </script>
+
+    </section>
 </div>
 
 <!-- Keyboard -->
 <div class="roll88">
     <div id="piano-container"></div>
 </div>
+
 
 <footer>
     <p>© 2025 My Piano Project</p>
@@ -72,7 +84,7 @@
 
 <script>
     // initialize piano
-    const piano = Clavonika.init('piano-container');
+    window.piano = Clavonika.init('piano-container');
 </script>
 
 </body>
