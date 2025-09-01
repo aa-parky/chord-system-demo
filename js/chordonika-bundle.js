@@ -913,6 +913,7 @@ let global;
         },
 
         // Create a standalone keyboard
+        // noinspection JSUnusedGlobalSymbols
         createKeyboard: function (selectorOrElement) {
             initializeStyles();
 
@@ -935,6 +936,9 @@ let global;
         utils: ChordUtils,
         data: ChordData
     };
+
+    // Ensure a public API method is considered used by IDE/static analysis
+    void (global.ChordSystem && global.ChordSystem.createKeyboard);
 
 })(typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : self);
 
