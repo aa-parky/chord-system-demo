@@ -54,13 +54,13 @@ header h1 {
     transition: color .15s ease, border-color .15s ease, background-color .15s ease;
 }
 
-.tabs button:hover {
+.tabs button:not(.active):hover {
     color: #111;
-    background: rgba(0,0,0,0.04); /* light hover wash */
+    background: dodgerblue;
 }
 
 .tabs button.active {
-    color: #111;
+    color: #2b8cff;
     border-bottom-color: #3a7bfd; /* accent underline */
 }
 
