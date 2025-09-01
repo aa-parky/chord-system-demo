@@ -32,6 +32,8 @@ header h1 {
     gap: 0;                 /* no gaps for a true nav feel */
     background: #fff;       /* or keep #444 if you prefer dark */
     border-bottom: 1px solid #ddd;
+    width: 1140px;          /* match tab-content width */
+    margin: 0 auto;         /* center to align with tab-content */
 }
 
 .tabs button {
