@@ -22,7 +22,12 @@
 </div>
 
 <div class="tab-content">
-    <section class="active">catchonika here</section>
+    <section class="active">
+        <!-- Card styles -->
+        <link rel="stylesheet" href="css/catchonika.css" />
+        <!-- In-page mount -->
+        <div id="catchonika-card"></div>
+    </section>
     <section>
         <div id="chord-selector"></div>
     </section>
@@ -69,6 +74,11 @@
 <script src="js/chordonika-bundle.js"></script>
 <script src="js/bundled-clavonika.js"></script>
 <script src="js/jackonika.js"></script>
+<!-- Vendored MidiWriterJS (global `MidiWriter`) -->
+<script src="vendor/midiwriter.js"></script>
+
+<!-- Catchonika -->
+<script src="js/catchonika.js"></script>
 
 <script>
     // Initialize the chord selector
@@ -93,6 +103,17 @@
     Jackonika.init({
         onNoteOn:  (note, vel) => piano.noteOn?.(note),
         onNoteOff: (note)      => piano.noteOff?.(note),
+    });
+</script>
+
+<script>
+    // initialize catchonika
+    new window.Catchonika({
+        mount: "#catchonika-card", // render as a card inside this element
+        mode: "card",
+        bufferMinutes: 60,
+        defaultBpm: 120,
+        groupByChannel: false,
     });
 </script>
 
