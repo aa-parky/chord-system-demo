@@ -83,6 +83,12 @@ header h1 {
     display: block;
 }
 
+/* Piano keyboard container */
+.roll88 {
+    margin-top: 2rem;       /* Add breathing room from tab content above */
+    margin-bottom: 1rem;    /* Optional: space before footer */
+}
+
 footer {
     margin-top: auto;
     background: #333;
