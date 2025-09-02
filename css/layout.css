@@ -5,6 +5,9 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    background-color: var(--color-bg-primary); /* Set the page background */
+    color: var(--color-text-primary); /* Set the default text color */
+    font-family: var(--font-family-sans);
 }
 
 header {
@@ -20,6 +23,13 @@ header h1 {
     line-height: 1.5;  /* tighter vertical spacing */
 }
 
+/* This new rule creates the main centered content column */
+.tonika-container {
+    width: 1140px;
+    margin: 0 auto; /* Center the container on the page */
+    padding: var(--spacing-lg) 0; /* Add some vertical breathing room */
+}
+
 /* Tabs */
 /* Wrapper to constrain width + content height */
 .tab-wrapper {
@@ -28,54 +38,48 @@ header h1 {
 }
 
 .tabs {
-    display: flex;
-    gap: 0;                 /* no gaps for a true nav feel */
-    background: #fff;       /* or keep #444 if you prefer dark */
-    border-bottom: 1px solid #ddd;
-    width: 1140px;          /* match tab-content width */
-    margin: 0 auto;         /* center to align with tab-content */
+    background: var(--color-bg-primary); /* Use primary background color */
+    border-bottom: var(--border-width) solid var(--color-border); /* Use theme's border color */
+    /* ... */
 }
 
 .tabs button {
-    appearance: none;
-    border: none;
     background: transparent;
-    color: #333;
-    cursor: pointer;
-
-    /* slim height */
-    padding: 0.5rem 0.9rem;
-    line-height: 1.2;
-    font-size: 0.95rem;
-    font-weight: 600;
-
-    /* nav-like look */
-    border-bottom: 2px solid transparent;
-    transition: color .15s ease, border-color .15s ease, background-color .15s ease;
+    color: var(--color-text-muted); /* Use muted text for non-active tabs */
+    /* ... */
 }
 
 .tabs button:not(.active):hover {
-    color: #111;
-    background: dodgerblue;
+    color: var(--color-text-primary);
+    background: var(--color-bg-secondary); /* Use a subtle background on hover */
 }
 
 .tabs button.active {
-    color: #2b8cff;
-    border-bottom-color: #3a7bfd; /* accent underline */
+    color: var(--color-accent); /* Use the main theme accent color */
+    border-bottom-color: var(--color-accent); /* Match the accent color */
 }
 
-/* Fixed content area size */
+
+/* Fixed content area size - Refactored with Tonika Core variables */
 .tab-content {
-    width: 1140px;          /* match wrapper */
-    height: 400px;          /* fixed height requested */
+    width: 1140px;          /* This remains a fixed value as per your design */
+    height: 400px;          /* This remains a fixed value as per your design */
     box-sizing: border-box;
-    border: 1px solid #ccc;
+
+    /* Replaced hard-coded border with theme variables */
+    border: var(--border-width) solid var(--color-border);
     border-top: none;       /* joins with the tab bar line */
-    padding: 0.75rem;
+
+    /* Replaced hard-coded padding with a standard spacing variable */
+    padding: var(--spacing-lg); /* 16px, using calc(4px * 4) from core */
+
+    /* Replaced hard-coded background with a theme variable */
+    background: var(--color-bg-primary);
+
     overflow: auto;         /* scroll if content exceeds 400px */
-    background: #fff;
     margin: 0 auto;         /* center if used outside .tab-wrapper */
 }
+
 
 .tab-content section {
     display: none;

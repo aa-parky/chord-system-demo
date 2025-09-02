@@ -3,14 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>Tonika Bundle</title>
+
+    <!-- 1. CORE STYLES (Variables for Theming) -->
+    <link rel="stylesheet" href="css/tonika-core.css" />
+
+    <!-- 2. SHARED COMPONENT STYLES (Buttons, Inputs, etc.) -->
+    <link rel="stylesheet" href="css/tonika-components.css" />
+
+    <!-- 3. PAGE-SPECIFIC LAYOUT -->
     <link rel="stylesheet" href="css/layout.css" />
 </head>
-<body>
+
+<body class="tonika-theme-dark">
 
 <header>
     <h1>Tonika</h1>
 </header>
 
+<main class="tonika-container">
 <!-- Tabs -->
 <div class="tabs">
     <button class="active" onclick="openTab(0)">Catchonika</button>
@@ -53,7 +63,7 @@
 <div class="roll88">
     <div id="piano-container"></div>
 </div>
-
+</main>
 
 <footer>
     <p>© 2025 My Piano Project</p>
