@@ -38,25 +38,42 @@ header h1 {
 }
 
 .tabs {
-    background: var(--color-bg-primary); /* Use primary background color */
-    border-bottom: var(--border-width) solid var(--color-border); /* Use theme's border color */
-    /* ... */
+    display: flex;
+    /* The background of the bar itself can be the secondary color */
+    background: var(--color-bg-secondary);
+    border-bottom: var(--border-width) solid var(--color-border);
 }
 
 .tabs button {
-    background: transparent;
-    color: var(--color-text-muted); /* Use muted text for non-active tabs */
-    /* ... */
+    appearance: none;
+    border: none;
+    /* Start with a transparent background */
+    background-color: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.95rem;
+    font-weight: 600;
+
+    /* Remove the bottom border, it's not needed for this style */
+    border-bottom: none;
+
+    /* Smooth transition for background color */
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
 
+/* Hover state: a slightly different background for non-active tabs */
 .tabs button:not(.active):hover {
+    background-color: var(--color-border); /* A subtle hover effect */
     color: var(--color-text-primary);
-    background: var(--color-bg-secondary); /* Use a subtle background on hover */
 }
 
+/* Active state: a solid background color */
 .tabs button.active {
-    color: var(--color-accent); /* Use the main theme accent color */
-    border-bottom-color: var(--color-accent); /* Match the accent color */
+    /* Use the main content background color to make it look "cut out" */
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary); /* Use the primary text color for emphasis */
+    font-weight: 700; /* Optional: make active tab text bolder */
 }
 
 
