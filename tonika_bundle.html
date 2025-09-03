@@ -12,6 +12,10 @@
 
     <!-- 3. PAGE-SPECIFIC LAYOUT -->
     <link rel="stylesheet" href="css/layout.css" />
+
+    <!-- 4. PAGE-SPECIFIC COMPONENT STYLES -->
+    <link rel="stylesheet" href="css/chordonika.css" />
+
 </head>
 
 <body class="tonika-theme-dark">
@@ -21,48 +25,48 @@
 </header>
 
 <main class="tonika-container">
-<!-- Tabs -->
-<div class="tabs">
-    <button class="active" onclick="openTab(0)">Catchonika</button>
-    <button onclick="openTab(1)">Chordonika</button>
-    <button onclick="openTab(2)">Tab 3</button>
-    <button onclick="openTab(3)">Tab 4</button>
-    <button onclick="openTab(4)">Tab 5</button>
-    <button onclick="openTab(5)">Midonika</button>
-</div>
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="active" onclick="openTab(0)">Catchonika</button>
+        <button onclick="openTab(1)">Chordonika</button>
+        <button onclick="openTab(2)">Tab 3</button>
+        <button onclick="openTab(3)">Tab 4</button>
+        <button onclick="openTab(4)">Tab 5</button>
+        <button onclick="openTab(5)">Midonika</button>
+    </div>
 
-<div class="tab-content">
-    <section class="active">
-        <!-- Card styles -->
-        <link rel="stylesheet" href="css/catchonika.css" />
-        <!-- In-page mount -->
-        <div id="catchonika-card"></div>
-    </section>
-    <section>
-        <div id="chord-selector"></div>
-    </section>
-    <section>Content for Tab 3</section>
-    <section>Content for Tab 4</section>
-    <section>Content for Tab 5</section>
-    <section>
-        <!-- Container for the MIDI component -->
-        <div id="midi-component"></div>
+    <div class="tab-content">
+        <section class="active">
+            <!-- Card styles -->
+            <link rel="stylesheet" href="css/catchonika.css" />
+            <!-- In-page mount -->
+            <div id="catchonika-card"></div>
+        </section>
+        <section>
+            <div id="chord-selector"></div>
+        </section>
+        <section>Content for Tab 3</section>
+        <section>Content for Tab 4</section>
+        <section>Content for Tab 5</section>
+        <section>
+            <!-- Container for the MIDI component -->
+            <div id="midi-component"></div>
 
-        <!-- Include the script -->
-        <script src="js/midonika.js"></script>
+            <!-- Include the script -->
+            <script src="js/midonika.js"></script>
 
-        <!-- Initialize the component -->
-        <script>
-            window.midonika = new Midonika('midi-component');
-        </script>
+            <!-- Initialize the component -->
+            <script>
+                window.midonika = new Midonika('midi-component');
+            </script>
 
-    </section>
-</div>
+        </section>
+    </div>
 
-<!-- Keyboard -->
-<div class="roll88">
-    <div id="piano-container"></div>
-</div>
+    <!-- Keyboard -->
+    <div class="roll88">
+        <div id="piano-container"></div>
+    </div>
 </main>
 
 <footer>
@@ -81,7 +85,7 @@
     }
 </script>
 
-<script src="js/chordonika-bundle.js"></script>
+<script src="js/chordonika.js"></script>
 <script src="js/bundled-clavonika.js"></script>
 <script src="js/jackonika.js"></script>
 <!-- Vendored MidiWriterJS (global `MidiWriter`) -->
@@ -90,13 +94,14 @@
 <!-- Catchonika -->
 <script src="js/catchonika.js"></script>
 
-<script>
-    // Initialize the chord selector
-    const chordSelector = ChordSystem.init('#chord-selector');
 
-    // Use the chordSelector
-    chordSelector.setChordSelectedCallback((chord) => {
-        console.log('Chord selected:', chord);
+<script>
+    new Chordonika({
+        mount: "#chord-selector",
+        mode: "card",
+        onChordSelected: (chord) => {
+            console.log('Selected chord:', chord);
+        }
     });
 </script>
 
