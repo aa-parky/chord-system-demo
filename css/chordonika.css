@@ -127,6 +127,7 @@
     padding: var(--spacing-md);
     gap: var(--spacing-md);
     align-items: center;
+    width: 510px;
 }
 
 .chordonika__chord-details {
@@ -176,11 +177,12 @@
     border: var(--border-width) solid var(--color-border);
     border-radius: var(--border-radius-md);
     padding: var(--spacing-md);
+    width: 510px;
 }
 
 .chordonika__keyboard {
     position: relative;
-    width: 548px;
+    width: 510px;
     height: 88px;
     background-color: var(--color-text-primary);
     border-radius: var(--border-radius-sm);
@@ -195,7 +197,7 @@
 }
 
 /* ===================================================================
-   KEYBOARD KEYS
+   KEYBOARD KEYS (using only available Tonika variables)
    ================================================================== */
 
 .chordonika__key {
@@ -224,7 +226,7 @@
     background-color: #f0f0f0;
 }
 
-.chordonika__key--white.active {
+.chordonika__key--white.chordonika__key--active {
     background-color: var(--color-accent);
     color: var(--color-accent-text);
 }
@@ -245,7 +247,7 @@
     background-color: #555;
 }
 
-.chordonika__key--black.active {
+.chordonika__key--black.chordonika__key--active {
     background-color: var(--color-accent);
     color: var(--color-accent-text);
 }
@@ -331,6 +333,6 @@
     right: 20px;
     width: 600px;
     z-index: 1000;
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-text-primary) 20%, transparent);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 

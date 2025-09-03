@@ -1,69 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Tonika Bundle</title>
 
-    <!-- 1. CORE STYLES (Variables for Theming) -->
+    <!-- 1) CORE THEME TOKENS -->
     <link rel="stylesheet" href="css/tonika-core.css" />
 
-    <!-- 2. SHARED COMPONENT STYLES (Buttons, Inputs, etc.) -->
+    <!-- 2) SHARED COMPONENTS (buttons, inputs, cards) -->
     <link rel="stylesheet" href="css/tonika-components.css" />
 
-    <!-- 3. PAGE-SPECIFIC LAYOUT -->
+    <!-- 3) PAGE LAYOUT -->
     <link rel="stylesheet" href="css/layout.css" />
 
-    <!-- 4. PAGE-SPECIFIC COMPONENT STYLES -->
+    <!-- 4) MODULE STYLES -->
     <link rel="stylesheet" href="css/chordonika.css" />
-
+    <!-- (Catchonika and others can load their own CSS if needed) -->
 </head>
 
 <body class="tonika-theme-dark">
-
 <header>
     <h1>Tonika</h1>
 </header>
 
 <main class="tonika-container">
     <!-- Tabs -->
-    <div class="tabs">
-        <button class="active" onclick="openTab(0)">Catchonika</button>
-        <button onclick="openTab(1)">Chordonika</button>
-        <button onclick="openTab(2)">Tab 3</button>
-        <button onclick="openTab(3)">Tab 4</button>
-        <button onclick="openTab(4)">Tab 5</button>
-        <button onclick="openTab(5)">Midonika</button>
+    <div class="tabs" role="tablist" aria-label="Tonika modules">
+        <button class="active" onclick="openTab(0)" role="tab" aria-selected="true">Catchonika</button>
+        <button onclick="openTab(1)" role="tab" aria-selected="false">Chordonika</button>
+        <button onclick="openTab(2)" role="tab" aria-selected="false">Tab 3</button>
+        <button onclick="openTab(3)" role="tab" aria-selected="false">Tab 4</button>
+        <button onclick="openTab(4)" role="tab" aria-selected="false">Tab 5</button>
+        <button onclick="openTab(5)" role="tab" aria-selected="false">Midonika</button>
     </div>
 
     <div class="tab-content">
+        <!-- Catchonika -->
         <section class="active">
-            <!-- Card styles -->
             <link rel="stylesheet" href="css/catchonika.css" />
-            <!-- In-page mount -->
             <div id="catchonika-card"></div>
         </section>
+
+        <!-- Chordonika -->
         <section>
             <div id="chord-selector"></div>
         </section>
+
         <section>Content for Tab 3</section>
         <section>Content for Tab 4</section>
         <section>Content for Tab 5</section>
+
+        <!-- Midonika -->
         <section>
-            <!-- Container for the MIDI component -->
             <div id="midi-component"></div>
-
-            <!-- Include the script -->
-            <script src="js/midonika.js"></script>
-
-            <!-- Initialize the component -->
-            <script>
-                window.midonika = new Midonika('midi-component');
-            </script>
-
         </section>
     </div>
 
-    <!-- Keyboard -->
+    <!-- 88-key piano roll -->
     <div class="roll88">
         <div id="piano-container"></div>
     </div>
@@ -79,58 +72,59 @@
         const sections = document.querySelectorAll('.tab-content section');
 
         tabs.forEach((tab, i) => {
-            tab.classList.toggle('active', i === index);
-            sections[i].classList.toggle('active', i === index);
+            const active = i === index;
+            tab.classList.toggle('active', active);
+            tab.setAttribute('aria-selected', String(active));
+            sections[i].classList.toggle('active', active);
         });
     }
 </script>
 
-<script src="js/chordonika.js"></script>
+<!-- ===== Scripts: order matters ===== -->
+<!-- Core modules -->
 <script src="js/bundled-clavonika.js"></script>
 <script src="js/jackonika.js"></script>
-<!-- Vendored MidiWriterJS (global `MidiWriter`) -->
+
+<!-- Vendor for Catchonika -->
 <script src="vendor/midiwriter.js"></script>
 
-<!-- Catchonika -->
+<!-- Module scripts -->
 <script src="js/catchonika.js"></script>
+<script src="js/chordonika.js"></script>
+<script src="js/midonika.js"></script>
 
-
+<!-- ===== Initialize modules ===== -->
 <script>
-    new Chordonika({
-        mount: "#chord-selector",
-        mode: "card",
-        onChordSelected: (chord) => {
-            console.log('Selected chord:', chord);
-        }
-    });
-</script>
-
-<script>
-    // initialize piano
-    window.piano = Clavonika.init('piano-container');
-</script>
-
-
-<script>
-    // initialize jackonika
+    // Single Clavonika instance
     const piano = Clavonika.init('piano-container');
+    window.piano = piano; // optional global
 
+    // Jackonika bridges external MIDI to the piano
     Jackonika.init({
         onNoteOn:  (note, vel) => piano.noteOn?.(note),
         onNoteOff: (note)      => piano.noteOff?.(note),
     });
-</script>
 
-<script>
-    // initialize catchonika
+    // Chordonika (Chord selector + visualizer)
+    new Chordonika({
+        mount: "#chord-selector",
+        mode: "card",
+        onChordSelected: (chord) => {
+            console.log("Selected chord:", chord);
+        }
+    });
+
+    // Midonika (MIDI event logger/monitor)
+    window.midonika = new Midonika('midi-component');
+
+    // Catchonika (MIDI capture/record)
     new window.Catchonika({
-        mount: "#catchonika-card", // render as a card inside this element
+        mount: "#catchonika-card",
         mode: "card",
         bufferMinutes: 60,
         defaultBpm: 120,
         groupByChannel: false,
     });
 </script>
-
 </body>
 </html>

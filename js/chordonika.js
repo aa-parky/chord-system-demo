@@ -1,6 +1,6 @@
 // Chordonika Module — Chord Selection and Keyboard Visualization
 // A Tonika module for interactive chord selection with visual keyboard feedback
-// v1.0.0 — Following Tonika design system principles
+// v1.0.2 — Fixed keyboard rendering and highlighting
 
 (() => {
     class Chordonika {
@@ -22,29 +22,28 @@
                     : opts.mount;
 // Initialize chord data
             this._initChordData();
-            
+
             this._renderUI();
             this._attachUIHandlers();
         }
 // === CHORD DATA INITIALIZATION ==========================================
-
         _initChordData() {
             this.chordData = {
-                noteNames: ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
-                
+                noteNames: ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"],
+
                 rootNotes: [
-                    { value: "C", label: "C" },
-                    { value: "C#", label: "C#/Db" },
-                    { value: "D", label: "D" },
-                    { value: "D#", label: "D#/Eb" },
-                    { value: "E", label: "E" },
-                    { value: "F", label: "F" },
-                    { value: "F#", label: "F#/Gb" },
-                    { value: "G", label: "G" },
-                    { value: "G#", label: "G#/Ab" },
-                    { value: "A", label: "A" },
-                    { value: "A#", label: "A#/Bb" },
-                    { value: "B", label: "B" },
+                    { value: "C",  label: "C"      },
+                    { value: "C#", label: "C#/Db"  },
+                    { value: "D",  label: "D"      },
+                    { value: "D#", label: "D#/Eb"  },
+                    { value: "E",  label: "E"      },
+                    { value: "F",  label: "F"      },
+                    { value: "F#", label: "F#/Gb"  },
+                    { value: "G",  label: "G"      },
+                    { value: "G#", label: "G#/Ab"  },
+                    { value: "A",  label: "A"      },
+                    { value: "A#", label: "A#/Bb"  },
+                    { value: "B",  label: "B"      },
                 ],
 
                 chordQualities: {
@@ -193,41 +192,40 @@
 
         _generateKeyHTML() {
             const keyLayout = [
-                // White keys with their positions
-                { note: 'C', octave: 3, type: 'white', position: 'c3' },
-                { note: 'D', octave: 3, type: 'white', position: 'd3' },
-                { note: 'E', octave: 3, type: 'white', position: 'e3' },
-                { note: 'F', octave: 3, type: 'white', position: 'f3' },
-                { note: 'G', octave: 3, type: 'white', position: 'g3' },
-                { note: 'A', octave: 3, type: 'white', position: 'a3' },
-                { note: 'B', octave: 3, type: 'white', position: 'b3' },
-                { note: 'C', octave: 4, type: 'white', position: 'c4' },
-                { note: 'D', octave: 4, type: 'white', position: 'd4' },
-                { note: 'E', octave: 4, type: 'white', position: 'e4' },
-                { note: 'F', octave: 4, type: 'white', position: 'f4' },
-                { note: 'G', octave: 4, type: 'white', position: 'g4' },
-                { note: 'A', octave: 4, type: 'white', position: 'a4' },
-                { note: 'B', octave: 4, type: 'white', position: 'b4' },
-                // Black keys
-                { note: 'C#', octave: 3, type: 'black', position: 'cs3' },
-                { note: 'D#', octave: 3, type: 'black', position: 'ds3' },
-                { note: 'F#', octave: 3, type: 'black', position: 'fs3' },
-                { note: 'G#', octave: 3, type: 'black', position: 'gs3' },
-                { note: 'A#', octave: 3, type: 'black', position: 'as3' },
-                { note: 'C#', octave: 4, type: 'black', position: 'cs4' },
-                { note: 'D#', octave: 4, type: 'black', position: 'ds4' },
-                { note: 'F#', octave: 4, type: 'black', position: 'fs4' },
-                { note: 'G#', octave: 4, type: 'black', position: 'gs4' },
-                { note: 'A#', octave: 4, type: 'black', position: 'as4' },
+                // white keys
+                { note:'C',  octave:3, type:'white', position:'c3' },
+                { note:'D',  octave:3, type:'white', position:'d3' },
+                { note:'E',  octave:3, type:'white', position:'e3' },
+                { note:'F',  octave:3, type:'white', position:'f3' },
+                { note:'G',  octave:3, type:'white', position:'g3' },
+                { note:'A',  octave:3, type:'white', position:'a3' },
+                { note:'B',  octave:3, type:'white', position:'b3' },
+                { note:'C',  octave:4, type:'white', position:'c4' },
+                { note:'D',  octave:4, type:'white', position:'d4' },
+                { note:'E',  octave:4, type:'white', position:'e4' },
+                { note:'F',  octave:4, type:'white', position:'f4' },
+                { note:'G',  octave:4, type:'white', position:'g4' },
+                { note:'A',  octave:4, type:'white', position:'a4' },
+                { note:'B',  octave:4, type:'white', position:'b4' },
+                // black keys
+                { note:'C#', octave:3, type:'black', position:'cs3' },
+                { note:'D#', octave:3, type:'black', position:'ds3' },
+                { note:'F#', octave:3, type:'black', position:'fs3' },
+                { note:'G#', octave:3, type:'black', position:'gs3' },
+                { note:'A#', octave:3, type:'black', position:'as3' },
+                { note:'C#', octave:4, type:'black', position:'cs4' },
+                { note:'D#', octave:4, type:'black', position:'ds4' },
+                { note:'F#', octave:4, type:'black', position:'fs4' },
+                { note:'G#', octave:4, type:'black', position:'gs4' },
+                { note:'A#', octave:4, type:'black', position:'as4' },
             ];
 
             return keyLayout.map(key => {
                 const keyId = `key-${key.position}`;
                 const noteLabel = key.note.replace('#', '♯');
-                
                 return `
                     <div class="chordonika__key chordonika__key--${key.type} chordonika__position--${key.position}"
-                         data-note="${key.note}" 
+                         data-note="${key.note}"
                          data-octave="${key.octave}"
                          data-key-id="${keyId}">
                         <div class="chordonika__note-label">${noteLabel}</div>
@@ -238,33 +236,30 @@
 
         _highlightChordNotes(chord) {
             this._clearHighlights();
-            
             if (!chord) return;
 
             const midiNotes = this._findOptimalOctave(chord.notes);
-            
             midiNotes.forEach(midiNote => {
                 const octave = Math.floor((midiNote - 12) / 12);
                 const noteIndex = (midiNote - 12) % 12;
                 const noteName = this.chordData.noteNames[noteIndex];
-                
+
                 const keyElement = this._mount?.querySelector(
                     `[data-note="${noteName}"][data-octave="${octave}"]`
                 );
-                
+
                 if (keyElement) {
-                    keyElement.classList.add('active');
+                    keyElement.classList.add('chordonika__key--active');
                 }
             });
         }
 
         _clearHighlights() {
-            const activeKeys = this._mount?.querySelectorAll('.chordonika__key.active');
-            activeKeys?.forEach(key => key.classList.remove('active'));
+            const activeKeys = this._mount?.querySelectorAll('.chordonika__key--active');
+            activeKeys?.forEach(key => key.classList.remove('chordonika__key--active'));
         }
 
-        // === UI RENDERING ====================================================
-
+        // === UI RENDERING =======================================================
         _renderUI() {
             if (!this._mount) {
                 const el = document.createElement("div");
@@ -311,7 +306,7 @@
                             </div>
                         </div>
 
-                        <div class="chordonika__chord-info">
+                        <div class="chordonika__chord-info" aria-live="polite">
                             <div class="chordonika__chord-details">
                                 <div class="chordonika__chord-symbol"></div>
                                 <div class="chordonika__chord-notes"></div>
