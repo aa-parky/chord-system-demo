@@ -30,6 +30,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-md); /* Use global spacing */
+    width: 570px;
 }
 
 /* Small inline controls row layout */
@@ -71,6 +72,7 @@
     min-height: 0; /* Critical for flexbox to allow shrinking and scrolling */
     overflow-y: auto; /* Enable vertical scrolling */
     padding-right: var(--spacing-xs); /* Keep scrollbar off content */
+    width: 570px;
 }
 
 /* Theme-aware scrollbar for the takes list */
